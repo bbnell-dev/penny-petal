@@ -73,6 +73,7 @@ body.dark-mode input,
 body.dark-mode select,
 body.dark-mode .ghost-button,
 body.dark-mode .import-button,
+body.dark-mode .download-backup-link,
 body.dark-mode .profile-button,
 body.dark-mode .category-chip,
 body.dark-mode .calendar-day,
@@ -318,7 +319,7 @@ h2 {
 
 .data-tools {
   grid-column: 1 / -1;
-  grid-template-columns: repeat(2, max-content);
+  grid-template-columns: repeat(3, max-content);
   gap: 10px;
 }
 
@@ -338,6 +339,20 @@ h2 {
 
 .import-button input {
   display: none;
+}
+
+.download-backup-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--mint-soft);
+  color: var(--ink);
+  padding: 0 14px;
+  font-weight: 900;
+  text-decoration: none;
 }
 
 .backup-text {

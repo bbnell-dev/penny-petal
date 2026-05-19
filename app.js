@@ -44,6 +44,7 @@ const els = {
   profileName: document.querySelector("#profileName"),
   exportData: document.querySelector("#exportData"),
   importData: document.querySelector("#importData"),
+  downloadBackupLink: document.querySelector("#downloadBackupLink"),
   backupText: document.querySelector("#backupText"),
   storageNotice: document.querySelector("#storageNotice"),
   categoryForm: document.querySelector("#categoryForm"),
@@ -466,6 +467,12 @@ async function exportData() {
   };
   const backupJson = JSON.stringify(backup, null, 2);
   const fileName = `penny-petal-backup-${todayIso}.json`;
+  const dataUrl = `data:application/json;charset=utf-8,${encodeURIComponent(backupJson)}`;
+
+  els.downloadBackupLink.href = dataUrl;
+  els.downloadBackupLink.download = fileName;
+  els.downloadBackupLink.hidden = false;
+
   els.backupText.hidden = false;
   els.backupText.value = backupJson;
   els.backupText.focus();
@@ -506,7 +513,7 @@ async function exportData() {
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch {
-    alert("The browser did not allow creating a file. Your backup is shown in the text box as a fallback.");
+    alert("The browser blocked auto-download. Use the Download backup file link that appeared.");
   }
 }
 
