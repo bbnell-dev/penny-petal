@@ -168,7 +168,9 @@ els.profileForm.addEventListener("submit", (event) => {
   saveAndRender();
 });
 
-els.exportData.addEventListener("click", exportData);
+els.exportData.addEventListener("click", () => {
+  exportData();
+});
 els.importData.addEventListener("change", importData);
 
 els.categoryForm.addEventListener("submit", (event) => {
@@ -455,7 +457,7 @@ function applyTheme() {
   els.themeToggle.textContent = isDark ? "Light mode" : "Dark mode";
 }
 
-function exportData() {
+async function exportData() {
   const backup = {
     app: "Penny Petal",
     version: 1,
@@ -463,24 +465,48 @@ function exportData() {
     data: appState,
   };
   const backupJson = JSON.stringify(backup, null, 2);
+  const fileName = `penny-petal-backup-${todayIso}.json`;
   els.backupText.hidden = false;
   els.backupText.value = backupJson;
   els.backupText.focus();
   els.backupText.select();
 
   try {
-    const blob = new Blob([backupJson], { type: "application/json" });
+    const blob = new Blob([backupJson], { type: "application/json;charset=utf-8" });
+
+    if ("showSaveFilePicker" in window) {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: fileName,
+        types: [
+          {
+            description: "JSON backup",
+            accept: { "application/json": [".json"] },
+          },
+        ],
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return;
+    }
+
+    if (window.navigator && typeof window.navigator.msSaveOrOpenBlob === "function") {
+      window.navigator.msSaveOrOpenBlob(blob, fileName);
+      return;
+    }
+
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `penny-petal-backup-${todayIso}.json`;
+    link.download = fileName;
     link.rel = "noopener";
+    link.style.display = "none";
     document.body.append(link);
-    link.click();
+    link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch {
-    alert("Your backup is shown in the text box. Copy it into a .json file to save it.");
+    alert("The browser did not allow creating a file. Your backup is shown in the text box as a fallback.");
   }
 }
 
