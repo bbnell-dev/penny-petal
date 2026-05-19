@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Penny Petal</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Cute budgeting system</p>
+          <h1>Penny Petal</h1>
+        </div>
+        <button id="calendarToggle" class="month-pill" type="button">
+          <span id="currentMonth"></span>
+        </button>
+        <button id="themeToggle" class="theme-toggle" type="button">Dark mode</button>
+      </header>
+
+      <section id="calendarPanel" class="calendar-panel" hidden aria-label="Upcoming bills calendar">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Calendar</p>
+            <h2 id="calendarMonthLabel">Upcoming bills</h2>
+          </div>
+          <div class="calendar-actions">
+            <button id="previousMonth" class="ghost-button" type="button">Previous</button>
+            <button id="nextMonth" class="ghost-button" type="button">Next</button>
+            <button id="closeCalendar" class="ghost-button" type="button">Close</button>
+          </div>
+        </div>
+        <div class="calendar-total">
+          <span>Total bills this month</span>
+          <strong id="calendarBillTotal">$0.00</strong>
+        </div>
+        <div class="calendar-weekdays" aria-hidden="true">
+          <span>Sun</span>
+          <span>Mon</span>
+          <span>Tue</span>
+          <span>Wed</span>
+          <span>Thu</span>
+          <span>Fri</span>
+          <span>Sat</span>
+        </div>
+        <div id="calendarGrid" class="calendar-grid"></div>
+      </section>
+
+      <section class="profile-panel" aria-label="Budget profiles">
+        <div class="profile-switcher">
+          <label>
+            Profile
+            <select id="profileSelect">
+              <option>My budget</option>
+            </select>
+          </label>
+          <div id="profileList" class="profile-list" aria-label="Profiles"></div>
+          <form id="newProfileForm" class="inline-form">
+            <label>
+            New profile
+              <input id="newProfileName" type="text" placeholder="My budget, school, shared bills" />
+            </label>
+            <button class="primary-action" type="submit">Create</button>
+          </form>
+        </div>
+
+        <form id="profileForm" class="profile-form">
+          <label>
+            Your name
+            <input id="profileName" type="text" placeholder="Enter your name" />
+          </label>
+          <button class="ghost-button" type="submit">Save profile</button>
+        </form>
+        <p id="storageNotice" class="storage-notice" hidden>Profiles are saved for this open page only.</p>
+      </section>
+
+      <section class="summary-grid" aria-label="Budget summary">
+        <article class="summary-card income">
+          <span>Income</span>
+          <strong id="incomeTotal">$0.00</strong>
+        </article>
+        <article class="summary-card spending">
+          <span>Spending</span>
+          <strong id="expenseTotal">$0.00</strong>
+        </article>
+        <article class="summary-card bills">
+          <span>Bills due</span>
+          <strong id="billTotal">$0.00</strong>
+        </article>
+        <article class="summary-card balance">
+          <span>Left to plan</span>
+          <strong id="balanceTotal">$0.00</strong>
+        </article>
+        <article class="summary-card savings">
+          <span>In savings</span>
+          <strong id="savingsTotal">$0.00</strong>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <aside class="entry-panel" aria-label="Add budget items">
+          <div class="tabs" role="tablist" aria-label="Entry type">
+            <button class="tab active" type="button" data-panel="transactionPanel">Transaction</button>
+            <button class="tab" type="button" data-panel="billPanel">Bill</button>
+          </div>
+
+          <form id="transactionPanel" class="entry-form active">
+            <label>
+              Type
+              <select id="transactionType">
+                <option value="income">Pay / income</option>
+                <option value="expense">Payment / purchase</option>
+                <option value="savings">Savings</option>
+              </select>
+            </label>
+            <label>
+              Name
+              <input id="transactionName" type="text" placeholder="Paycheck, groceries, coffee" required />
+            </label>
+            <label>
+              Category
+              <select id="transactionCategory">
+                <option>Pay</option>
+                <option>Bills</option>
+                <option>Food</option>
+                <option>Home</option>
+                <option>Fun</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <label>
+              Amount
+              <input id="transactionAmount" type="number" min="0" step="0.01" placeholder="0.00" required />
+            </label>
+            <label>
+              Date
+              <input id="transactionDate" type="date" required />
+            </label>
+            <button class="primary-action" type="submit">Add transaction</button>
+          </form>
+
+          <div class="category-manager">
+            <form id="categoryForm" class="inline-form">
+              <label>
+                Custom category
+                <input id="categoryName" type="text" placeholder="Gas, gifts, school" required />
+              </label>
+              <button class="primary-action" type="submit">Add</button>
+            </form>
+            <div id="categoryList" class="category-list" aria-label="Custom categories"></div>
+          </div>
+
+          <form id="billPanel" class="entry-form">
+            <label>
+              Bill
+              <input id="billName" type="text" placeholder="Rent, phone, utilities" required />
+            </label>
+            <label>
+              Organization
+              <input id="billOrganization" type="text" placeholder="Apartment, bank, provider" required />
+            </label>
+            <label>
+              Amount
+              <input id="billAmount" type="number" min="0" step="0.01" placeholder="0.00" required />
+            </label>
+            <label>
+              Due date
+              <input id="billDueDate" type="date" required />
+            </label>
+            <label>
+              Repeats
+              <select id="billRepeat">
+                <option value="once">One time</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </label>
+            <button class="primary-action" type="submit">Add bill</button>
+          </form>
+        </aside>
+
+        <section class="charts-area" aria-label="Budget charts">
+          <div class="chart-panel large">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Flow</p>
+                <h2>Monthly progress over time</h2>
+              </div>
+            </div>
+            <canvas id="flowChart" width="780" height="340" aria-label="Income and spending bar chart"></canvas>
+          </div>
+
+          <div class="chart-row">
+            <div class="chart-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Categories</p>
+                  <h2>Where money goes</h2>
+                </div>
+              </div>
+              <div class="category-chart-layout">
+                <canvas id="categoryChart" width="360" height="260" aria-label="Spending by category chart"></canvas>
+                <div id="categoryBreakdown" class="category-breakdown"></div>
+              </div>
+            </div>
+            <div class="chart-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Bills</p>
+                  <h2>Upcoming due dates</h2>
+                </div>
+              </div>
+              <div id="billList" class="bill-list"></div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="ledger" aria-label="Transactions">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Ledger</p>
+            <h2>Recent transactions</h2>
+          </div>
+          <button id="clearDemo" class="ghost-button" type="button">Reset sample data</button>
+        </div>
+        <div id="transactionList" class="transaction-list"></div>
+      </section>
+
+      <section id="editTransactionPanel" class="edit-panel" hidden aria-label="Edit transaction">
+        <form id="editTransactionForm" class="edit-form">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Edit</p>
+              <h2>Transaction details</h2>
+            </div>
+            <button id="cancelTransactionEdit" class="ghost-button" type="button">Cancel</button>
+          </div>
+          <label>
+            Type
+            <select id="editTransactionType">
+              <option value="income">Pay / income</option>
+              <option value="expense">Payment / purchase</option>
+              <option value="savings">Savings</option>
+            </select>
+          </label>
+          <label>
+            Name
+            <input id="editTransactionName" type="text" required />
+          </label>
+          <label>
+            Category
+            <select id="editTransactionCategory"></select>
+          </label>
+          <label>
+            Amount
+            <input id="editTransactionAmount" type="number" min="0" step="0.01" required />
+          </label>
+          <label>
+            Date
+            <input id="editTransactionDate" type="date" required />
+          </label>
+          <button class="primary-action" type="submit">Save transaction</button>
+        </form>
+      </section>
+
+      <section id="editBillPanel" class="edit-panel" hidden aria-label="Edit bill">
+        <form id="editBillForm" class="edit-form">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Edit</p>
+              <h2>Bill details</h2>
+            </div>
+            <button id="cancelBillEdit" class="ghost-button" type="button">Cancel</button>
+          </div>
+          <label>
+            Bill
+            <input id="editBillName" type="text" required />
+          </label>
+          <label>
+            Organization
+            <input id="editBillOrganization" type="text" required />
+          </label>
+          <label>
+            Amount
+            <input id="editBillAmount" type="number" min="0" step="0.01" required />
+          </label>
+          <label>
+            Due date
+            <input id="editBillDueDate" type="date" required />
+          </label>
+          <label>
+            Repeats
+            <select id="editBillRepeat">
+              <option value="once">One time</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </label>
+          <button class="primary-action" type="submit">Save bill</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
