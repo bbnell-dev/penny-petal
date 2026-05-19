@@ -44,6 +44,7 @@ const els = {
   profileName: document.querySelector("#profileName"),
   exportData: document.querySelector("#exportData"),
   importData: document.querySelector("#importData"),
+  backupText: document.querySelector("#backupText"),
   storageNotice: document.querySelector("#storageNotice"),
   categoryForm: document.querySelector("#categoryForm"),
   categoryName: document.querySelector("#categoryName"),
@@ -461,15 +462,26 @@ function exportData() {
     exportedAt: new Date().toISOString(),
     data: appState,
   };
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `penny-petal-backup-${todayIso}.json`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  const backupJson = JSON.stringify(backup, null, 2);
+  els.backupText.hidden = false;
+  els.backupText.value = backupJson;
+  els.backupText.focus();
+  els.backupText.select();
+
+  try {
+    const blob = new Blob([backupJson], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `penny-petal-backup-${todayIso}.json`;
+    link.rel = "noopener";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch {
+    alert("Your backup is shown in the text box. Copy it into a .json file to save it.");
+  }
 }
 
 function importData(event) {

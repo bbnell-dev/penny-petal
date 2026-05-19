@@ -340,6 +340,18 @@ h2 {
   display: none;
 }
 
+.backup-text {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 180px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdfb;
+  color: var(--ink);
+  padding: 12px;
+  font: 700 0.82rem ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
 .category-manager {
   border-top: 1px solid var(--line);
   margin-top: 2px;
