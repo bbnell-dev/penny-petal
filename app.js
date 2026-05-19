@@ -54,6 +54,7 @@ const els = {
   savingsTotal: document.querySelector("#savingsTotal"),
   transactionList: document.querySelector("#transactionList"),
   billList: document.querySelector("#billList"),
+  flowChartTitle: document.querySelector("#flowChartTitle"),
   flowChart: document.querySelector("#flowChart"),
   categoryChart: document.querySelector("#categoryChart"),
   categoryBreakdown: document.querySelector("#categoryBreakdown"),
@@ -83,6 +84,7 @@ let appState = loadAppState();
 let editingTransactionId = null;
 let editingBillId = null;
 let calendarDate = new Date(today.getFullYear(), today.getMonth(), 1);
+let flowChartMode = "trend";
 
 document.querySelector("#transactionDate").value = todayIso;
 document.querySelector("#billDueDate").value = todayIso;
@@ -115,6 +117,14 @@ els.nextMonth.addEventListener("click", () => {
 
 els.closeCalendar.addEventListener("click", () => {
   els.calendarPanel.hidden = true;
+});
+
+document.querySelectorAll("[data-flow-mode]").forEach((button) => {
+  button.addEventListener("click", () => {
+    flowChartMode = button.dataset.flowMode;
+    document.querySelectorAll("[data-flow-mode]").forEach((item) => item.classList.toggle("active", item === button));
+    render();
+  });
 });
 
 document.querySelectorAll(".tab").forEach((tab) => {
@@ -625,6 +635,12 @@ function renderCalendar(profile) {
 }
 
 function drawFlowChart(totals, profile) {
+  els.flowChartTitle.textContent = flowChartMode === "trend" ? "Monthly progress over time" : "Current month comparison";
+  if (flowChartMode === "bars") {
+    drawFlowBarChart(totals);
+    return;
+  }
+
   const canvas = els.flowChart;
   const ctx = setupCanvas(canvas);
   const width = canvas.clientWidth;
@@ -691,6 +707,45 @@ function drawFlowChart(totals, profile) {
     ctx.textAlign = "left";
     ctx.fillText(line.label, legendX + 20, legendY + 1);
     legendX += ctx.measureText(line.label).width + 54;
+  });
+}
+
+function drawFlowBarChart(totals) {
+  const canvas = els.flowChart;
+  const ctx = setupCanvas(canvas);
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  const chartTop = 42;
+  const chartBottom = height - 42;
+  const max = Math.max(totals.income, totals.expenses, totals.bills, totals.savings, 1);
+  const bars = [
+    { label: "Income", value: totals.income, color: "#a8d8b9" },
+    { label: "Spending", value: totals.expenses, color: "#f5a9b8" },
+    { label: "Bills", value: totals.bills, color: "#f7d58b" },
+    { label: "Savings", value: totals.savings, color: "#b8e0d2" },
+  ];
+
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = cssColor("--panel");
+  ctx.fillRect(0, 0, width, height);
+  drawGrid(ctx, width, height, chartTop, chartBottom);
+
+  const gap = width < 560 ? 18 : 38;
+  const barWidth = Math.max(34, (width - gap * (bars.length + 1)) / bars.length);
+
+  bars.forEach((bar, index) => {
+    const x = gap + index * (barWidth + gap);
+    const barHeight = (bar.value / max) * (chartBottom - chartTop);
+    const y = chartBottom - barHeight;
+    roundedRect(ctx, x, y, barWidth, barHeight || 4, 8, bar.color);
+
+    ctx.fillStyle = cssColor("--ink");
+    ctx.font = "800 13px Inter, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(bar.label, x + barWidth / 2, chartBottom + 24);
+    ctx.fillStyle = cssColor("--muted");
+    ctx.font = "800 12px Inter, sans-serif";
+    ctx.fillText(money.format(bar.value), x + barWidth / 2, Math.max(24, y - 12));
   });
 }
 

@@ -595,6 +595,36 @@ select:focus {
   gap: 16px;
 }
 
+.chart-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  border-radius: 8px;
+  background: #f8edf1;
+  padding: 4px;
+}
+
+.chart-toggle-button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 12px;
+  font-weight: 900;
+}
+
+.chart-toggle-button.active {
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 8px 18px rgba(76, 54, 48, 0.08);
+}
+
+body.dark-mode .chart-toggle {
+  background: #211b28;
+}
+
 .chart-row {
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.85fr);
 }

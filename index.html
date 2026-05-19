@@ -186,7 +186,11 @@
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">Flow</p>
-                <h2>Monthly progress over time</h2>
+                <h2 id="flowChartTitle">Monthly progress over time</h2>
+              </div>
+              <div class="chart-toggle" aria-label="Flow chart view">
+                <button class="chart-toggle-button active" type="button" data-flow-mode="trend">Trend</button>
+                <button class="chart-toggle-button" type="button" data-flow-mode="bars">Bars</button>
               </div>
             </div>
             <canvas id="flowChart" width="780" height="340" aria-label="Income and spending bar chart"></canvas>
