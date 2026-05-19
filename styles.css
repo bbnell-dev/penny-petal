@@ -72,6 +72,7 @@ select {
 body.dark-mode input,
 body.dark-mode select,
 body.dark-mode .ghost-button,
+body.dark-mode .import-button,
 body.dark-mode .profile-button,
 body.dark-mode .category-chip,
 body.dark-mode .calendar-day,
@@ -301,6 +302,7 @@ h2 {
 
 .profile-switcher,
 .profile-form,
+.data-tools,
 .inline-form,
 .category-manager,
 .category-list,
@@ -312,6 +314,30 @@ h2 {
 .profile-form {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
+}
+
+.data-tools {
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, max-content);
+  gap: 10px;
+}
+
+.import-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fffdfb;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 14px;
+  font-weight: 900;
+}
+
+.import-button input {
+  display: none;
 }
 
 .category-manager {
@@ -599,12 +625,17 @@ select:focus {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px;
+  min-width: 148px;
   border-radius: 8px;
   background: #f8edf1;
   padding: 4px;
 }
 
 .chart-toggle-button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 34px;
   border: 0;
   border-radius: 7px;

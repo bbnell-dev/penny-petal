@@ -42,6 +42,8 @@ const els = {
   newProfileName: document.querySelector("#newProfileName"),
   profileForm: document.querySelector("#profileForm"),
   profileName: document.querySelector("#profileName"),
+  exportData: document.querySelector("#exportData"),
+  importData: document.querySelector("#importData"),
   storageNotice: document.querySelector("#storageNotice"),
   categoryForm: document.querySelector("#categoryForm"),
   categoryName: document.querySelector("#categoryName"),
@@ -55,6 +57,8 @@ const els = {
   transactionList: document.querySelector("#transactionList"),
   billList: document.querySelector("#billList"),
   flowChartTitle: document.querySelector("#flowChartTitle"),
+  trendChartButton: document.querySelector("#trendChartButton"),
+  barChartButton: document.querySelector("#barChartButton"),
   flowChart: document.querySelector("#flowChart"),
   categoryChart: document.querySelector("#categoryChart"),
   categoryBreakdown: document.querySelector("#categoryBreakdown"),
@@ -119,12 +123,14 @@ els.closeCalendar.addEventListener("click", () => {
   els.calendarPanel.hidden = true;
 });
 
-document.querySelectorAll("[data-flow-mode]").forEach((button) => {
-  button.addEventListener("click", () => {
-    flowChartMode = button.dataset.flowMode;
-    document.querySelectorAll("[data-flow-mode]").forEach((item) => item.classList.toggle("active", item === button));
-    render();
-  });
+els.trendChartButton.addEventListener("click", (event) => {
+  event.preventDefault();
+  setFlowChartMode("trend");
+});
+
+els.barChartButton.addEventListener("click", (event) => {
+  event.preventDefault();
+  setFlowChartMode("bars");
 });
 
 document.querySelectorAll(".tab").forEach((tab) => {
@@ -160,6 +166,9 @@ els.profileForm.addEventListener("submit", (event) => {
   profile.name = els.profileName.value.trim() || "My budget";
   saveAndRender();
 });
+
+els.exportData.addEventListener("click", exportData);
+els.importData.addEventListener("change", importData);
 
 els.categoryForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -443,6 +452,54 @@ function applyTheme() {
   const isDark = appState.theme === "dark";
   document.body.classList.toggle("dark-mode", isDark);
   els.themeToggle.textContent = isDark ? "Light mode" : "Dark mode";
+}
+
+function exportData() {
+  const backup = {
+    app: "Penny Petal",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data: appState,
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `penny-petal-backup-${todayIso}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const [file] = event.target.files;
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const importedState = parsed.data && parsed.app ? parsed.data : parsed;
+      appState = normalizeAppState(importedState);
+      closeTransactionEditor();
+      closeBillEditor();
+      saveAndRender();
+      alert("Data imported successfully.");
+    } catch {
+      alert("That file could not be imported. Please choose a Penny Petal JSON backup.");
+    } finally {
+      els.importData.value = "";
+    }
+  });
+  reader.readAsText(file);
+}
+
+function setFlowChartMode(mode) {
+  flowChartMode = mode === "bars" ? "bars" : "trend";
+  els.trendChartButton.classList.toggle("active", flowChartMode === "trend");
+  els.barChartButton.classList.toggle("active", flowChartMode === "bars");
+  drawFlowChart(getTotals(), currentProfile());
 }
 
 function saveAndRender() {

@@ -72,6 +72,13 @@
           </label>
           <button class="ghost-button" type="submit">Save profile</button>
         </form>
+        <div class="data-tools">
+          <button id="exportData" class="ghost-button" type="button">Export data</button>
+          <label class="import-button">
+            Import data
+            <input id="importData" type="file" accept="application/json,.json" />
+          </label>
+        </div>
         <p id="storageNotice" class="storage-notice" hidden>Profiles are saved for this open page only.</p>
       </section>
 
@@ -188,9 +195,9 @@
                 <p class="eyebrow">Flow</p>
                 <h2 id="flowChartTitle">Monthly progress over time</h2>
               </div>
-              <div class="chart-toggle" aria-label="Flow chart view">
-                <button class="chart-toggle-button active" type="button" data-flow-mode="trend">Trend</button>
-                <button class="chart-toggle-button" type="button" data-flow-mode="bars">Bars</button>
+              <div id="flowChartToggle" class="chart-toggle" aria-label="Flow chart view">
+                <button id="trendChartButton" class="chart-toggle-button active" type="button" data-flow-mode="trend">Trend</button>
+                <button id="barChartButton" class="chart-toggle-button" type="button" data-flow-mode="bars">Bars</button>
               </div>
             </div>
             <canvas id="flowChart" width="780" height="340" aria-label="Income and spending bar chart"></canvas>
