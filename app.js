@@ -473,10 +473,8 @@ async function exportData() {
   els.downloadBackupLink.download = fileName;
   els.downloadBackupLink.hidden = false;
 
-  els.backupText.hidden = false;
+  els.backupText.hidden = true;
   els.backupText.value = backupJson;
-  els.backupText.focus();
-  els.backupText.select();
 
   try {
     const blob = new Blob([backupJson], { type: "application/json;charset=utf-8" });
@@ -513,6 +511,9 @@ async function exportData() {
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch {
+    els.backupText.hidden = false;
+    els.backupText.focus();
+    els.backupText.select();
     alert("The browser blocked auto-download. Use the Download backup file link that appeared.");
   }
 }
