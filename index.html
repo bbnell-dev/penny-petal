@@ -7,47 +7,105 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <button id="menuOverlay" class="menu-overlay" type="button" hidden aria-label="Close navigation menu"></button>
+    <div id="profileSetupModal" class="modal-backdrop" hidden>
+      <form id="profileSetupForm" class="setup-modal" aria-label="Create your profile">
+        <p class="eyebrow">Welcome</p>
+        <h2>Create your profile</h2>
+        <label>
+          Profile name
+          <input id="profileSetupName" type="text" placeholder="My budget, school, shared bills" required />
+        </label>
+        <label>
+          Current checking balance
+          <input id="profileSetupChecking" type="number" min="0" step="0.01" placeholder="0.00" />
+        </label>
+        <label>
+          Current savings balance
+          <input id="profileSetupSavings" type="number" min="0" step="0.01" placeholder="0.00" />
+        </label>
+        <button class="primary-action" type="submit">Start budgeting</button>
+        <label class="import-button setup-import">
+          Import saved data
+          <input id="profileSetupImportData" type="file" accept="application/json,.json" />
+        </label>
+      </form>
+    </div>
+    <div id="sectionGuideModal" class="modal-backdrop" hidden>
+      <section class="setup-modal guide-modal" aria-label="Dashboard guide">
+        <p class="eyebrow">How to use Penny Petal</p>
+        <div class="guide-slide active" data-guide-slide="0">
+          <h2>Your budget at a glance</h2>
+          <p class="guide-intro">Here is what each little money petal is tracking for you.</p>
+          <div class="guide-list">
+            <div><strong>Income</strong><span>All the money that has come in this month.</span></div>
+            <div><strong>Spending</strong><span>Purchases and payments you enter as transactions.</span></div>
+            <div><strong>Bills</strong><span>What you expect to owe this month. When you pay one, add it as a transaction.</span></div>
+            <div><strong>Left to spend</strong><span>Income left after the transactions you have entered.</span></div>
+            <div><strong>In savings</strong><span>Your saved money. Set a savings goal here to track your progress.</span></div>
+          </div>
+        </div>
+        <div class="guide-slide" data-guide-slide="1">
+          <h2>Reading your graphs</h2>
+          <p class="guide-intro">The charts help you spot patterns without doing the math in your head.</p>
+          <div class="guide-graph-list">
+            <div class="guide-graph-card">
+              <div class="guide-line-preview" aria-hidden="true">
+                <span class="line income-line"></span>
+                <span class="line spending-line"></span>
+                <span class="line savings-line"></span>
+              </div>
+              <strong>Six month trend</strong>
+              <span>Shows income, spending, bills, and savings over time so you can see progress or changes.</span>
+            </div>
+            <div class="guide-graph-card">
+              <div class="guide-donut-preview" aria-hidden="true"></div>
+              <strong>Category donut</strong>
+              <span>Shows where money is going this month. Tap a category to see the entries inside it.</span>
+            </div>
+          </div>
+        </div>
+        <button id="closeSectionGuide" class="primary-action" type="button">Next</button>
+      </section>
+    </div>
+    <nav id="sideMenu" class="side-menu" hidden aria-label="Main navigation">
+      <div class="side-menu-header">
+        <div>
+          <p class="eyebrow">Menu</p>
+          <h2>Penny Petal</h2>
+        </div>
+        <button id="closeMenu" class="ghost-button" type="button">Close</button>
+      </div>
+      <a href="#">Home</a>
+      <a href="#profiles">Profiles</a>
+      <a href="#bills">Bills</a>
+      <a href="#ledger">Ledger</a>
+      <a href="#settings">Settings</a>
+    </nav>
     <main class="app-shell">
       <header class="topbar">
-        <div>
+        <button id="openMenu" class="menu-button" type="button" aria-label="Open navigation menu">Menu</button>
+        <div class="brand-lockup">
           <p class="eyebrow">Cute budgeting system</p>
-          <h1>Penny Petal</h1>
+          <div class="brand-title">
+            <span class="petal-logo" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <h1>Penny Petal</h1>
+          </div>
         </div>
-        <button id="calendarToggle" class="month-pill" type="button">
-          <span id="currentMonth"></span>
-        </button>
-        <button id="themeToggle" class="theme-toggle" type="button">Dark mode</button>
       </header>
 
-      <section id="calendarPanel" class="calendar-panel" hidden aria-label="Upcoming bills calendar">
-        <div class="panel-heading">
+      <section id="profiles" class="profile-panel" aria-label="Budget profiles">
+        <div class="panel-heading profile-page-heading">
           <div>
-            <p class="eyebrow">Calendar</p>
-            <h2 id="calendarMonthLabel">Upcoming bills</h2>
-          </div>
-          <div class="calendar-actions">
-            <button id="previousMonth" class="ghost-button" type="button">Previous</button>
-            <button id="nextMonth" class="ghost-button" type="button">Next</button>
-            <button id="closeCalendar" class="ghost-button" type="button">Close</button>
+            <p class="eyebrow">Profiles</p>
+            <h2>Create your profile</h2>
           </div>
         </div>
-        <div class="calendar-total">
-          <span>Total bills this month</span>
-          <strong id="calendarBillTotal">$0.00</strong>
-        </div>
-        <div class="calendar-weekdays" aria-hidden="true">
-          <span>Sun</span>
-          <span>Mon</span>
-          <span>Tue</span>
-          <span>Wed</span>
-          <span>Thu</span>
-          <span>Fri</span>
-          <span>Sat</span>
-        </div>
-        <div id="calendarGrid" class="calendar-grid"></div>
-      </section>
-
-      <section class="profile-panel" aria-label="Budget profiles">
         <div class="profile-switcher">
           <label>
             Profile
@@ -65,13 +123,6 @@
           </form>
         </div>
 
-        <form id="profileForm" class="profile-form">
-          <label>
-            Your name
-            <input id="profileName" type="text" placeholder="Enter your name" />
-          </label>
-          <button class="ghost-button" type="submit">Save profile</button>
-        </form>
         <div class="data-tools">
           <button id="exportData" class="ghost-button" type="button">Export data</button>
           <a id="downloadBackupLink" class="download-backup-link" download hidden>Download backup file</a>
@@ -84,7 +135,53 @@
         <p id="storageNotice" class="storage-notice" hidden>Profiles are saved for this open page only.</p>
       </section>
 
-      <section class="summary-grid" aria-label="Budget summary">
+      <section id="settings" class="settings-panel" aria-label="Settings">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Settings</p>
+            <h2>Preferences</h2>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="item-title">Theme</div>
+            <div class="item-meta">Switch between light and dark mode.</div>
+          </div>
+          <button id="themeToggle" class="theme-toggle" type="button">Dark mode</button>
+        </div>
+        <div class="setting-row theme-customizer">
+          <div>
+            <div class="item-title">Custom colors</div>
+            <div class="item-meta">Choose your text and background colors.</div>
+          </div>
+          <div class="theme-color-grid">
+            <label>
+              Text
+              <input id="textColorPicker" type="color" value="#283044" />
+            </label>
+            <label>
+              Background 1
+              <input id="backgroundColorPicker" type="color" value="#fff9fb" />
+            </label>
+            <label>
+              Background 2
+              <input id="backgroundColorEndPicker" type="color" value="#e7f4ff" />
+            </label>
+            <label>
+              Direction
+              <select id="gradientDirection">
+                <option value="135deg">Soft diagonal</option>
+                <option value="90deg">Side to side</option>
+                <option value="180deg">Top to bottom</option>
+                <option value="45deg">Candy diagonal</option>
+              </select>
+            </label>
+            <button id="resetThemeColors" class="ghost-button" type="button">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="summary" class="summary-grid" aria-label="Budget summary">
         <article class="summary-card income">
           <span>Income</span>
           <strong id="incomeTotal">$0.00</strong>
@@ -98,16 +195,28 @@
           <strong id="billTotal">$0.00</strong>
         </article>
         <article class="summary-card balance">
-          <span>Left to plan</span>
+          <span>Left to spend</span>
           <strong id="balanceTotal">$0.00</strong>
         </article>
         <article class="summary-card savings">
           <span>In savings</span>
           <strong id="savingsTotal">$0.00</strong>
+          <form id="savingsGoalForm" class="savings-goal-form">
+            <label>
+              Goal
+              <input id="savingsGoalInput" type="number" min="0" step="0.01" placeholder="0.00" />
+            </label>
+            <button type="submit">Set</button>
+          </form>
+          <button id="savingsGoalEdit" class="savings-goal-edit" type="button" hidden>New goal</button>
+          <div class="savings-goal-progress" aria-label="Savings goal progress">
+            <div id="savingsGoalBar"></div>
+          </div>
+          <p id="savingsGoalText" class="savings-goal-text">No goal set</p>
         </article>
       </section>
 
-      <section class="workspace">
+      <section id="entries" class="workspace">
         <aside class="entry-panel" aria-label="Add budget items">
           <div class="tabs" role="tablist" aria-label="Entry type">
             <button class="tab active" type="button" data-panel="transactionPanel">Transaction</button>
@@ -190,16 +299,12 @@
           </form>
         </aside>
 
-        <section class="charts-area" aria-label="Budget charts">
+        <section id="charts" class="charts-area" aria-label="Budget charts">
           <div class="chart-panel large">
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">Flow</p>
-                <h2 id="flowChartTitle">Monthly progress over time</h2>
-              </div>
-              <div id="flowChartToggle" class="chart-toggle" aria-label="Flow chart view">
-                <button id="trendChartButton" class="chart-toggle-button active" type="button" data-flow-mode="trend">Trend</button>
-                <button id="barChartButton" class="chart-toggle-button" type="button" data-flow-mode="bars">Bars</button>
+                <h2 id="flowChartTitle">6-month progress over time</h2>
               </div>
             </div>
             <canvas id="flowChart" width="780" height="340" aria-label="Income and spending bar chart"></canvas>
@@ -217,28 +322,86 @@
                 <canvas id="categoryChart" width="360" height="260" aria-label="Spending by category chart"></canvas>
                 <div id="categoryBreakdown" class="category-breakdown"></div>
               </div>
-            </div>
-            <div class="chart-panel">
-              <div class="panel-heading">
-                <div>
-                  <p class="eyebrow">Bills</p>
-                  <h2>Upcoming due dates</h2>
-                </div>
-              </div>
-              <div id="billList" class="bill-list"></div>
+              <div id="categoryDetailPanel" class="category-detail-panel" hidden></div>
             </div>
           </div>
+
+          <section class="chart-panel recent-ledger-panel" aria-label="Recent transactions preview">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Ledger</p>
+                <h2>Recent transactions</h2>
+              </div>
+              <a class="ghost-button ledger-back" href="#ledger">View all</a>
+            </div>
+            <div id="dashboardTransactionList" class="transaction-list"></div>
+          </section>
         </section>
       </section>
 
-      <section class="ledger" aria-label="Transactions">
+      <section id="bills" class="bills-page" aria-label="Bills">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Bills</p>
+            <h2>Bill calendar</h2>
+          </div>
+          <a class="ghost-button ledger-back" href="#summary">Budget home</a>
+        </div>
+
+        <section id="calendarPanel" class="calendar-panel" aria-label="Upcoming bills calendar">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Calendar</p>
+              <h2 id="calendarMonthLabel">Upcoming bills</h2>
+            </div>
+            <div class="calendar-actions">
+              <button id="previousMonth" class="ghost-button" type="button">Previous</button>
+              <button id="nextMonth" class="ghost-button" type="button">Next</button>
+            </div>
+          </div>
+          <div class="calendar-total">
+            <span>Total bills this month</span>
+            <strong id="calendarBillTotal">$0.00</strong>
+          </div>
+          <div class="calendar-weekdays" aria-hidden="true">
+            <span>Sun</span>
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+        </section>
+
+        <div class="bills-list-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Upcoming</p>
+              <h2>Bill list</h2>
+            </div>
+          </div>
+          <div id="billList" class="bill-list"></div>
+        </div>
+      </section>
+
+      <section id="ledger" class="ledger" aria-label="Transactions">
         <div class="panel-heading">
           <div>
             <p class="eyebrow">Ledger</p>
             <h2>Recent transactions</h2>
           </div>
-          <button id="clearDemo" class="ghost-button" type="button">Reset sample data</button>
+          <a class="ghost-button ledger-back" href="#summary">Budget home</a>
         </div>
+        <div class="ledger-view-tools">
+          <div>
+            <div class="item-title">Category view</div>
+            <div class="item-meta">Choose a category to see the transactions inside it.</div>
+          </div>
+          <div id="ledgerCategoryFilters" class="ledger-category-filters" aria-label="Ledger category filters"></div>
+        </div>
+        <div id="ledgerCategoryDetail" class="ledger-category-detail"></div>
         <div id="transactionList" class="transaction-list"></div>
       </section>
 
