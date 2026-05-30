@@ -313,11 +313,16 @@
           <div class="chart-row">
             <div class="chart-panel">
               <div class="panel-heading">
-                <div>
-                  <p class="eyebrow">Categories</p>
+              <div>
+                <p class="eyebrow">Categories</p>
                   <h2>Where money goes</h2>
-                </div>
               </div>
+              <div class="chart-month-controls" aria-label="Category chart month">
+                <button id="previousCategoryMonth" class="ghost-button" type="button" aria-label="Previous category month">&larr;</button>
+                <span id="categoryMonthLabel">This month</span>
+                <button id="nextCategoryMonth" class="ghost-button" type="button" aria-label="Next category month">&rarr;</button>
+              </div>
+            </div>
               <div class="category-chart-layout">
                 <canvas id="categoryChart" width="360" height="260" aria-label="Spending by category chart"></canvas>
                 <div id="categoryBreakdown" class="category-breakdown"></div>

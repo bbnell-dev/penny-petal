@@ -84,6 +84,9 @@ const els = {
   billList: document.querySelector("#billList"),
   flowChartTitle: document.querySelector("#flowChartTitle"),
   flowChart: document.querySelector("#flowChart"),
+  previousCategoryMonth: document.querySelector("#previousCategoryMonth"),
+  nextCategoryMonth: document.querySelector("#nextCategoryMonth"),
+  categoryMonthLabel: document.querySelector("#categoryMonthLabel"),
   categoryChart: document.querySelector("#categoryChart"),
   categoryBreakdown: document.querySelector("#categoryBreakdown"),
   categoryDetailPanel: document.querySelector("#categoryDetailPanel"),
@@ -112,6 +115,7 @@ let appState = loadAppState();
 let editingTransactionId = null;
 let editingBillId = null;
 let calendarDate = new Date(today.getFullYear(), today.getMonth(), 1);
+let categoryChartDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedLedgerCategory = ALL_LEDGER_CATEGORIES;
 
 if (appState.needsProfileSetup && window.location.hash === "#profiles") {
@@ -128,7 +132,10 @@ els.menuOverlay.addEventListener("click", closeSideMenu);
 els.sideMenu.querySelectorAll("a").forEach((link) => {
   link.addEventListener("click", closeSideMenu);
 });
-window.addEventListener("hashchange", syncPageView);
+window.addEventListener("hashchange", () => {
+  syncPageView();
+  scheduleChartRedraw();
+});
 
 els.profileSetupForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -200,6 +207,18 @@ els.previousMonth.addEventListener("click", () => {
 els.nextMonth.addEventListener("click", () => {
   calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1);
   renderCalendar(currentProfile());
+});
+
+els.previousCategoryMonth.addEventListener("click", () => {
+  categoryChartDate = new Date(categoryChartDate.getFullYear(), categoryChartDate.getMonth() - 1, 1);
+  els.categoryDetailPanel.hidden = true;
+  drawCategoryChart(currentProfile());
+});
+
+els.nextCategoryMonth.addEventListener("click", () => {
+  categoryChartDate = new Date(categoryChartDate.getFullYear(), categoryChartDate.getMonth() + 1, 1);
+  els.categoryDetailPanel.hidden = true;
+  drawCategoryChart(currentProfile());
 });
 
 els.calendarGrid.addEventListener("click", (event) => {
@@ -673,6 +692,14 @@ function syncPageView() {
   document.body.classList.toggle("ledger-page", window.location.hash === "#ledger");
 }
 
+function scheduleChartRedraw() {
+  requestAnimationFrame(() => {
+    const profile = currentProfile();
+    drawFlowChart(getTotals(), profile);
+    drawCategoryChart(profile);
+  });
+}
+
 async function exportData() {
   const backup = {
     app: "Penny Petal",
@@ -1128,6 +1155,7 @@ function drawFlowChart(totals, profile) {
   els.flowChartTitle.textContent = "6-month progress over time";
   const canvas = els.flowChart;
   const ctx = setupCanvas(canvas);
+  if (!ctx) return;
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
   const chartTop = 30;
@@ -1198,22 +1226,24 @@ function drawFlowChart(totals, profile) {
 function drawCategoryChart(profile) {
   const canvas = els.categoryChart;
   const ctx = setupCanvas(canvas);
+  if (!ctx) return;
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
-  const expenses = [
-    ...profile.transactions.filter(
-      (transaction) => transaction.type === "expense" && isInCurrentMonth(transaction.date) && isOnOrBeforeToday(transaction.date),
-    ),
-    ...getBillOccurrences(profile, today.getFullYear(), today.getMonth()).map((bill) => ({
-      category: "Bills",
-      amount: bill.amount,
-    })),
-  ];
+  const selectedYear = categoryChartDate.getFullYear();
+  const selectedMonth = categoryChartDate.getMonth();
+  const throughToday = isCurrentBudgetMonth(selectedYear, selectedMonth);
+  const expenses = profile.transactions.filter(
+    (transaction) =>
+      transaction.type === "expense" &&
+      isInMonth(transaction.date, selectedYear, selectedMonth) &&
+      (!throughToday || isOnOrBeforeToday(transaction.date)),
+  );
   const byCategory = expenses.reduce((map, transaction) => {
     map[transaction.category] = (map[transaction.category] || 0) + transaction.amount;
     return map;
   }, {});
-  const leftToSpend = Math.max(getTotals().balance, 0);
+  const monthActivity = getMonthActivity(profile, selectedYear, selectedMonth, throughToday);
+  const leftToSpend = Math.max(getStartingBalanceForMonth(profile, selectedYear, selectedMonth) + monthActivity.balance, 0);
   const entries = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
   if (leftToSpend > 0) {
     entries.push(["Left to spend", leftToSpend]);
@@ -1223,9 +1253,10 @@ function drawCategoryChart(profile) {
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = cssColor("--panel");
   ctx.fillRect(0, 0, width, height);
+  renderCategoryMonthControls();
 
   if (!total) {
-    els.categoryBreakdown.innerHTML = `<div class="empty-state">No income or purchases this month</div>`;
+    els.categoryBreakdown.innerHTML = `<div class="empty-state">No income or purchases for this month</div>`;
     ctx.fillStyle = cssColor("--muted");
     ctx.font = "800 15px Inter, sans-serif";
     ctx.textAlign = "center";
@@ -1267,9 +1298,17 @@ function drawCategoryChart(profile) {
     .join("");
 }
 
+function renderCategoryMonthControls() {
+  els.categoryMonthLabel.textContent = formatMonthYear(categoryChartDate);
+  els.nextCategoryMonth.disabled = isCurrentBudgetMonth(categoryChartDate.getFullYear(), categoryChartDate.getMonth());
+}
+
 function showCategoryDetails(category) {
   const profile = currentProfile();
   const rows = [];
+  const selectedYear = categoryChartDate.getFullYear();
+  const selectedMonth = categoryChartDate.getMonth();
+  const throughToday = isCurrentBudgetMonth(selectedYear, selectedMonth);
 
   if (category === "Left to spend") {
     els.categoryDetailPanel.hidden = false;
@@ -1280,13 +1319,18 @@ function showCategoryDetails(category) {
           <h2>Left to spend</h2>
         </div>
       </div>
-      <div class="empty-state">This is what remains after dated income, spending, and new savings transfers.</div>
+      <div class="empty-state">This is what remains after dated income, spending, and new savings transfers for ${escapeHtml(formatMonthYear(categoryChartDate))}.</div>
     `;
     return;
   }
 
   profile.transactions
-    .filter((transaction) => transaction.category === category && isInCurrentMonth(transaction.date))
+    .filter(
+      (transaction) =>
+        transaction.category === category &&
+        isInMonth(transaction.date, selectedYear, selectedMonth) &&
+        (!throughToday || isOnOrBeforeToday(transaction.date)),
+    )
     .forEach((transaction) => {
       rows.push({
         name: transaction.name,
@@ -1295,7 +1339,7 @@ function showCategoryDetails(category) {
       });
     });
 
-  if (category === "Bills") {
+  if (false && category === "Bills") {
     profile.bills
       .filter((bill) => isInCurrentMonth(bill.dueDate))
       .forEach((bill) => {
@@ -1338,6 +1382,7 @@ function showCategoryDetails(category) {
 function setupCanvas(canvas) {
   const ratio = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return null;
   canvas.width = rect.width * ratio;
   canvas.height = rect.height * ratio;
   const ctx = canvas.getContext("2d");
@@ -1451,6 +1496,14 @@ function isInCurrentMonth(value) {
   return isInMonth(value, today.getFullYear(), today.getMonth());
 }
 
+function isCurrentBudgetMonth(year, month) {
+  return year === today.getFullYear() && month === today.getMonth();
+}
+
+function formatMonthYear(date) {
+  return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+}
+
 function isOnOrBeforeToday(value) {
   return value <= todayIso;
 }
@@ -1485,7 +1538,7 @@ function fillCategorySelect(select, profile, selectedCategory) {
 }
 
 function ledgerCategories(profile) {
-  const categories = new Set([...profile.categories, SAVINGS_CATEGORY]);
+  const categories = new Set();
   profile.transactions.forEach((transaction) => categories.add(transaction.category));
   return [...categories].filter(Boolean).sort((a, b) => a.localeCompare(b));
 }
