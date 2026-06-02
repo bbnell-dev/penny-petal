@@ -799,7 +799,7 @@ function getTotals() {
     income: monthActivity.income,
     expenses: monthActivity.expenses,
     bills: monthActivity.bills,
-    savings: monthActivity.savings,
+    savings: getSavingsBalance(profile),
     balance: startingBalance + monthActivity.balance,
   };
 }
@@ -835,6 +835,16 @@ function getMonthActivity(profile, year, month, throughToday = false) {
     savings,
     balance: income - expenses - newSavings,
   };
+}
+
+function getSavingsBalance(profile) {
+  return profile.transactions
+    .filter(
+      (transaction) =>
+        (transaction.type === "savings" || isSavingsCategory(transaction.category, profile)) &&
+        isOnOrBeforeToday(transaction.date),
+    )
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
 }
 
 function getStartingBalanceForMonth(profile, year, month) {
